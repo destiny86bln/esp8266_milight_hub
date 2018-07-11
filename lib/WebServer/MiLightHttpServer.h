@@ -1,6 +1,8 @@
 #include <WebServer.h>
 #include <MiLightClient.h>
 #include <Settings.h>
+#include <Sensors.h>
+
 #include <WebSocketsServer.h>
 #include <GroupStateStore.h>
 
@@ -16,12 +18,13 @@ const char APPLICATION_JSON[] = "application/json";
 
 class MiLightHttpServer {
 public:
-  MiLightHttpServer(Settings& settings, MiLightClient*& milightClient, GroupStateStore*& stateStore)
+  MiLightHttpServer(Settings& settings, Sensors& sensors, MiLightClient*& milightClient, GroupStateStore*& stateStore)
     : server(80),
       wsServer(WebSocketsServer(81)),
       numWsClients(0),
       milightClient(milightClient),
       settings(settings),
+      sensors(sensors),
       stateStore(stateStore)
   {
     this->applySettings(settings);
@@ -41,6 +44,7 @@ protected:
     const char* defaultText = NULL);
 
   void serveSettings();
+  void serveSensors();
   bool serveFile(const char* file, const char* contentType = "text/html");
   ESP8266WebServer::THandlerFunction handleUpdateFile(const char* filename);
   ESP8266WebServer::THandlerFunction handleServe_P(const char* data, size_t length);
@@ -67,6 +71,7 @@ protected:
   WebServer server;
   WebSocketsServer wsServer;
   Settings& settings;
+  Sensors& sensors;
   MiLightClient*& milightClient;
   GroupStateStore*& stateStore;
   SettingsSavedHandler settingsSavedHandler;

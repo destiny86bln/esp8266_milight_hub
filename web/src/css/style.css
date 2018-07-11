@@ -5,6 +5,8 @@ label { display: block; }
 .command-buttons li { display: inline-block; margin-right: 1em; overflow: auto; }
 .form-entry { margin: 0 0 20px 0; }
 .form-entry .form-control { width: 20em; }
+.form-entry .form-control-2 { width: 30em; }
+.form-entry .form-control-1 { width: 10em; }
 .form-entry label { display: inline-block; }
 label:not(.error) .error-info { display: none; }
 .error-info { color: #f00; font-size: 0.7em; }

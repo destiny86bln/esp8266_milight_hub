@@ -19,6 +19,15 @@ var UI_TABS = [ {
   }, {
     tag: "tab-mqtt",
     friendly: "MQTT"
+  }, {
+    tag: "tab-ota",
+    friendly: "OTA"
+  }, {
+    tag: "tab-i2c",
+    friendly: "I²C"
+  }, {
+    tag: "tab-sensor",
+    friendly: "Sensors"
   }
 ];
 
@@ -90,13 +99,13 @@ var UI_FIELDS = [ {
     type: "string",
     tab: "tab-mqtt"
   }, {
-    tag: "mqtt_topic_pattern", 
+    tag: "mqtt_topic_pattern",
     friendly: "MQTT topic pattern",
     help: "Pattern for MQTT topics to listen on. Example: lights/:device_id/:device_type/:group_id. See README for further details",
     type: "string",
     tab: "tab-mqtt"
   }, {
-    tag:   "mqtt_update_topic_pattern", 
+    tag:   "mqtt_update_topic_pattern",
     friendly: "MQTT update topic pattern",
     help: "Pattern to publish MQTT updates. Packets that are received from other devices, and packets that are sent from this device will " +
     "result in updates being sent",
@@ -109,19 +118,31 @@ var UI_FIELDS = [ {
     type: "string",
     tab: "tab-mqtt"
   }, {
-    tag:   "mqtt_username", 
+    tag:   "mqtt_sensor_topic_pattern",
+    friendly: "MQTT sensor topic pattern",
+    help: "Pattern for MQTT topic to publish sensor data. Example: sensors/:sensor_type. Every minute the state of all sensors will be published to this topic pattern",
+    type: "string",
+    tab: "tab-mqtt"
+  }, {
+    tag: "mqtt_client_id",
+    friendly: "Client ID",
+    help: "Client ID to log in to MQTT server (leave blank for auto create)",
+    type: "string",
+    tab: "tab-mqtt"
+  }, {
+    tag:   "mqtt_username",
     friendly: "MQTT user name",
     help: "User name to log in to MQTT server",
     type: "string",
     tab: "tab-mqtt"
   }, {
-    tag:   "mqtt_password", 
+    tag:   "mqtt_password",
     friendly: "MQTT password",
     help: "Password to log into MQTT server",
     type: "string",
     tab: "tab-mqtt"
   }, {
-    tag:   "radio_interface_type", 
+    tag:   "radio_interface_type",
     friendly: "Radio interface type",
     help: "2.4 GHz radio model. Only change this if you know you're not using an NRF24L01!",
     type: "radio_interface_type",
@@ -134,14 +155,14 @@ var UI_FIELDS = [ {
     type: "string",
     tab: "tab-wifi"
   }, {
-    tag:   "state_flush_interval", 
+    tag:   "state_flush_interval",
     friendly: "State flush interval",
     help: "Minimum number of milliseconds between flushing state to flash. " +
     "Set to 0 to disable delay and immediately persist state to flash",
     type: "string",
     tab: "tab-setup"
   }, {
-    tag:   "mqtt_state_rate_limit", 
+    tag:   "mqtt_state_rate_limit",
     friendly: "MQTT state rate limit",
     help: "Minimum number of milliseconds between MQTT updates of bulb state (defaults to 500)",
     type: "string",
@@ -156,7 +177,7 @@ var UI_FIELDS = [ {
     type: "string",
     tab: "tab-radio"
   }, {
-    tag:   "packet_repeat_throttle_sensitivity", 
+    tag:   "packet_repeat_throttle_sensitivity",
     friendly: "Packet repeat throttle sensitivity",
     help: "Controls how packet repeats are throttled. " +
     "Higher values cause packets to be throttled up and down faster " +
@@ -164,7 +185,7 @@ var UI_FIELDS = [ {
     type: "string",
     tab: "tab-radio"
   }, {
-    tag:   "packet_repeat_minimum", 
+    tag:   "packet_repeat_minimum",
     friendly: "Packet repeat minimum",
     help: "Controls how far throttling can decrease the number " +
     "of repeated packets (defaults to 3)",
@@ -177,7 +198,7 @@ var UI_FIELDS = [ {
     type: "group_state_fields",
     tab: "tab-mqtt"
   }, {
-    tag:   "enable_automatic_mode_switching", 
+    tag:   "enable_automatic_mode_switching",
     friendly: "Enable automatic mode switching",
     help: "For RGBWW bulbs (using RGB+CCT or FUT089), enables automatic switching between modes in order to affect changes to " +
     "temperature and saturation when otherwise it would not work",
@@ -212,9 +233,102 @@ var UI_FIELDS = [ {
     friendly: "Flash count on packets",
     help: "Number of times the LED will flash when packets are changing",
     type: "string",
-    tab: "tab-led"    
+    tab: "tab-led"
+  },
+
+ {
+    tag: "ota_password",
+    friendly: "OTA Password",
+    help: "Password for over the Air controler firmware update",
+    type: "string",
+    tab: "tab-ota"
+  }, {
+    tag: "hostname",
+    friendly: "WiFi Hostname",
+    help: "Hostname of this device in Wifi",
+    type: "string",
+    tab: "tab-wifi"
+  }, {
+    tag: "static_ip",
+    friendly: "Static IP",
+    help: "IP for static Wifi configuration (leave blank for DHCP config)",
+    type: "string",
+    tab: "tab-wifi"
+  }, {
+    tag: "static_mask",
+    friendly: "Subnet Mask",
+    help: "Subnet Mask for static Wifi configuration",
+    type: "string",
+    tab: "tab-wifi"
+  }, {
+    tag: "static_gate",
+    friendly: "Gateway",
+    help: "Gateway for static Wifi configuration",
+    type: "string",
+    tab: "tab-wifi"
+  }, {
+    tag: "mqtt_pin1",
+    friendly: "Status pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange)",
+    type: "string",
+    tab: "tab-sensor"
+  }, {
+    tag: "mqtt_pin2",
+    friendly: "Status pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange)",
+    type: "string",
+    tab: "tab-sensor"
+  }, {
+    tag: "mqtt_pin3",
+    friendly: "Status pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange)",
+    type: "string",
+    tab: "tab-sensor"
+  }, {
+    tag: "mqtt_pin4",
+    friendly: "Status pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange)",
+    type: "string",
+    tab: "tab-sensor"
+  }, {
+    tag: "sda_pin",
+    friendly: "SDA pin",
+    help: "'SDA' for I2C interface (nodemcu : D2 > 4)",
+    type: "string",
+    tab: "tab-i2c"
+  }, {
+    tag: "scl_pin",
+    friendly: "SCL pin",
+    help: "'SCL' for I2C interface (nodemcu : D1 > 5)",
+    type: "string",
+    tab: "tab-i2c"
+  }, {
+    tag: "sensor_si7021",
+    friendly: "Si7021",
+    help: "Si7021 I²C Humidity and Temperature Sensor",
+    type: "sensor",
+    tab: "tab-sensor"
+  }, {
+    tag: "sensor_bme280",
+    friendly: "BME280",
+    help: "BME280 I²C Humidity and Pressure Sensor",
+    type: "sensor",
+    tab: "tab-sensor"
+  }, {
+    tag: "sensor_bh1750",
+    friendly: "BH1750",
+    help: "BH1750 I²C Digital Light Level Sensor",
+    type: "sensor",
+    tab: "tab-sensor"
+  }, {
+    tag: "sensor_pins",
+    friendly: "State Pins",
+    help: "configured digital state pin sensors",
+    type: "sensor",
+    tab: "tab-sensor"
   }
 ];
+
 
 // TODO: sync this with GroupStateField.h
 var GROUP_STATE_KEYS = [
@@ -369,6 +483,14 @@ var loadSettings = function() {
         if (field.attr('type') === 'radio') {
           field.filter('[value="' + val[k] + '"]').click();
         } else {
+          field.removeClass('form-control-1');
+          field.removeClass('form-control-2');
+          if(val[k].length > 20 ){
+            field.addClass('form-control-2');
+          }else if(val[k].length > 0 && val[k].length < 7 ){
+            field.addClass('form-control-1');
+          }
+
           field.val(val[k]);
         }
       }
@@ -413,6 +535,28 @@ var loadSettings = function() {
         gatewayForm.append(gatewayServerRow(toHex(v[0]), v[1], v[2]));
       });
     }
+  });
+};
+
+
+var loadSensors = function() {
+  $.getJSON('/sensors', function(val) {
+    Object.keys(val).forEach(function(k) {
+      var field = $('#settings input[name="' + k + '"]');
+      if (field.length > 0) {
+          if(field.prop('disabled')){
+              if(val[k] == true ){
+                field.addClass('bg-success');
+                field.val("found");
+              }else{
+                field.addClass('bg-danger');
+                field.val("not detected");
+              }
+          }else{
+            field.val(val[k]);
+          }
+      }
+    });
   });
 };
 
@@ -833,6 +977,8 @@ $(function() {
               '<input type="radio" id="disable_mode_switching" name="enable_automatic_mode_switching" autocomplete="off" value="false" /> Disable' +
             '</label>' +
           '</div>';
+        } else if (k.type == 'sensor') {
+          elmt += '<input type="text" class="form-control"  disabled name="' + k.tag + '"/>';
         } else {
           elmt += '<input type="text" class="form-control" name="' + k.tag + '"/>';
         }
@@ -843,7 +989,7 @@ $(function() {
     });
     settings += "</div>";
   });
-  
+
   // UDP gateways tab
   settings += '<div class="tab-pane fade ' + tabClass + '" id="tab-udp-gateways">';
   settings += $('#gateway-servers-modal .modal-body').remove().html();
@@ -852,6 +998,7 @@ $(function() {
   settings += "</div>";
 
   $('#settings').prepend(settings);
+
 
   $('#settings').submit(function(e) {
     e.preventDefault();
@@ -899,7 +1046,7 @@ $(function() {
     }
 
     $('#settings-modal').modal('hide');
-    
+
     return false;
   });
 
@@ -924,5 +1071,6 @@ $(function() {
   $('#updates-btn').click(handleCheckForUpdates);
 
   loadSettings();
+  loadSensors();
   updateModeOptions();
 });

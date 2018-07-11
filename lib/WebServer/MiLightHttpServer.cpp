@@ -2,6 +2,8 @@
 #include <WiFiUdp.h>
 #include <IntParsing.h>
 #include <Settings.h>
+#include <Sensors.h>
+
 #include <MiLightHttpServer.h>
 #include <MiLightRadioConfig.h>
 #include <string.h>
@@ -15,6 +17,7 @@ void MiLightHttpServer::begin() {
 
   _handleRootPage = handleServe_P(index_html_gz, index_html_gz_len);
   server.onAuthenticated("/", HTTP_GET, [this]() { _handleRootPage(); });
+  server.onAuthenticated("/sensors", HTTP_GET, [this]() { serveSensors(); });
   server.onAuthenticated("/settings", HTTP_GET, [this]() { serveSettings(); });
   server.onAuthenticated("/settings", HTTP_PUT, [this]() { handleUpdateSettings(); });
   server.onAuthenticated("/settings", HTTP_POST, [this]() { handleUpdateSettingsPost(); }, handleUpdateFile(SETTINGS_FILE));
@@ -99,6 +102,13 @@ void MiLightHttpServer::serveSettings() {
   // Save first to set defaults
   settings.save();
   serveFile(SETTINGS_FILE, APPLICATION_JSON);
+}
+
+
+void MiLightHttpServer::serveSensors() {
+  // Save first to set defaults
+  sensors.save();
+  serveFile(SENSORS_FILE, APPLICATION_JSON);
 }
 
 void MiLightHttpServer::applySettings(Settings& settings) {
@@ -485,4 +495,3 @@ ESP8266WebServer::THandlerFunction MiLightHttpServer::handleServe_P(const char* 
     server.client().stop();
   };
 }
-

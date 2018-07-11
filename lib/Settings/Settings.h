@@ -4,6 +4,8 @@
 #include <GroupStateField.h>
 #include <Size.h>
 #include <LEDStatus.h>
+// Additional
+#include <IPAddress.h>
 
 #ifndef _SETTINGS_H_INCLUDED
 #define _SETTINGS_H_INCLUDED
@@ -168,6 +170,23 @@ public:
   LEDStatus::LEDMode ledModePacket;
   size_t ledModePacketCount;
 
+  //Aditional vars
+  String hostname;
+  String otaPass;
+  String staticIp;
+  String staticMask;
+  String staticGate;
+  IPAddress _staticIp;
+  IPAddress _staticMask;
+  IPAddress _staticGate;
+  uint8_t sdaPin;
+  uint8_t sclPin;
+  uint8_t mqttPin1;
+  uint8_t mqttPin2;
+  uint8_t mqttPin3;
+  uint8_t mqttPin4;
+  String mqttClientId;
+  String mqttSensorTopicPattern;
 
 protected:
   size_t _autoRestartPeriod;

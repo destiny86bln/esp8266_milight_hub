@@ -20,6 +20,7 @@ public:
   void handleClient();
   void reconnect();
   void sendUpdate(const MiLightRemoteConfig& remoteConfig, uint16_t deviceId, uint16_t groupId, const char* update);
+  void sendSensor(String sensor , const char* update); //aditional topic
   void sendState(const MiLightRemoteConfig& remoteConfig, uint16_t deviceId, uint16_t groupId, const char* update);
 
 private:
@@ -47,6 +48,13 @@ private:
     const MiLightRemoteConfig& remoteConfig,
     const uint16_t deviceId,
     const uint16_t groupId
+  );
+
+  // aditional topic
+  void publishSensor(
+    const String& topic,
+    const String& sensor,
+    const char* update
   );
 };
 

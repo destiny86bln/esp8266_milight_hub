@@ -26,6 +26,9 @@ void Settings::deserialize(Settings& settings, String json) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& parsedSettings = jsonBuffer.parseObject(json);
   settings.patch(parsedSettings);
+  settings._staticGate.fromString(settings.staticGate);
+  settings._staticIp.fromString(settings.staticIp);
+  settings._staticMask.fromString(settings.staticMask);
 }
 
 void Settings::updateDeviceIds(JsonArray& arr) {
@@ -106,6 +109,21 @@ void Settings::patch(JsonObject& parsedSettings) {
     this->setIfPresent(parsedSettings, "packet_repeat_minimum", packetRepeatMinimum);
     this->setIfPresent(parsedSettings, "enable_automatic_mode_switching", enableAutomaticModeSwitching);
     this->setIfPresent(parsedSettings, "led_mode_packet_count", ledModePacketCount);
+
+    //aditional config features
+    this->setIfPresent(parsedSettings, "hostname", hostname);
+    this->setIfPresent(parsedSettings, "static_ip", staticIp);
+    this->setIfPresent(parsedSettings, "static_mask", staticMask);
+    this->setIfPresent(parsedSettings, "static_gate", staticGate);
+    this->setIfPresent(parsedSettings, "sda_pin", sdaPin);
+    this->setIfPresent(parsedSettings, "scl_pin", sclPin);
+    this->setIfPresent(parsedSettings, "mqtt_pin1", mqttPin1);
+    this->setIfPresent(parsedSettings, "mqtt_pin2", mqttPin2);
+    this->setIfPresent(parsedSettings, "mqtt_pin3", mqttPin3);
+    this->setIfPresent(parsedSettings, "mqtt_pin4", mqttPin4);
+    this->setIfPresent(parsedSettings, "ota_pass", otaPass);
+    this->setIfPresent(parsedSettings, "mqtt_client_id", mqttClientId);
+    this->setIfPresent(parsedSettings, "mqtt_sensor_topic_pattern", mqttSensorTopicPattern);
 
     if (parsedSettings.containsKey("led_mode_wifi_config")) {
       this->ledModeWifiConfig = LEDStatus::stringToLEDMode(parsedSettings["led_mode_wifi_config"]);
@@ -205,6 +223,21 @@ void Settings::serialize(Stream& stream, const bool prettyPrint) {
   root["led_mode_operating"] = LEDStatus::LEDModeToString(this->ledModeOperating);
   root["led_mode_packet"] = LEDStatus::LEDModeToString(this->ledModePacket);
   root["led_mode_packet_count"] = this->ledModePacketCount;
+
+  //Aditional features
+  root["hostname"] = this->hostname;
+  root["static_ip"] = this->staticIp;
+  root["static_mask"] = this->staticMask;
+  root["static_gate"] = this->staticGate;
+  root["sda_pin"] = this->sdaPin;
+  root["scl_pin"] = this->sclPin;
+  root["mqtt_pin1"] = this->mqttPin1;
+  root["mqtt_pin2"] = this->mqttPin2;
+  root["mqtt_pin3"] = this->mqttPin3;
+  root["mqtt_pin4"] = this->mqttPin4;
+  root["ota_pass"] = this->otaPass;
+  root["mqtt_client_id"] = this->mqttClientId;
+  root["mqtt_sensor_topic_pattern"] = this->mqttSensorTopicPattern;
 
   if (this->deviceIds) {
     JsonArray& arr = jsonBuffer.createArray();
