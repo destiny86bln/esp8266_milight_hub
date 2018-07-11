@@ -53,7 +53,7 @@ bool MqttClient::connect() {
 
   if (settings.mqttUsername.length() > 0) {
     return mqttClient->connect(
-      nameBuffer,
+      settings.mqttUsername.c_str(),
       settings.mqttUsername.c_str(),
       settings.mqttPassword.c_str()
     );
