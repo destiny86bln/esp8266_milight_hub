@@ -32,6 +32,10 @@ const MiLightRemoteConfig* MiLightRemoteConfig::fromType(const String& type) {
     return &FUT098Config;
   }
 
+  if(type.equalsIgnoreCase("sensors")){
+    return false;
+  }
+
   Serial.print(F("MiLightRemoteConfig::fromType: ERROR - tried to fetch remote config for type: "));
   Serial.println(type);
 

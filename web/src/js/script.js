@@ -484,7 +484,9 @@ var loadSettings = function() {
         } else {
           field.removeClass('form-control-1');
           field.removeClass('form-control-2');
+          console.log('length of value from ' + k + ' is ' + val[k].length + ' value is ' + val[k] );
           if(val[k].length > 20 ){
+
             field.addClass('form-control-2');
           }else if(val[k].length > 0 && val[k].length < 7 ){
             field.addClass('form-control-1');
@@ -575,6 +577,27 @@ var loadSensors = function() {
            }
            console.log('full value is ' + field.val());
          }
+
+      }else{
+        if(k == 'sensor_pin_states'){
+          console.log("found pin state stack");
+          $.each(val[k].split(';') , function( index, value ) {
+            console.log("pin state for index " + index + " is " + value);
+            var field = $('#settings input[name="mqtt_pin_' + ( index + 1 ) + '_state"]');
+            if(value == 1 ){
+              field.parent().removeClass('hidden');
+              field.css("background-color", "#28a745");
+              field.val("high");
+            }else if(value == 0 ){
+              field.parent().removeClass('hidden');
+              field.css("background-color", "#dc3545");
+              field.val("low");
+            }else{
+              field.parent().addClass('hidden');
+
+            }
+          });
+        }
       }
     });
     console.log('sensor states updated');
@@ -1005,8 +1028,8 @@ $(function() {
           elmt += '<div class="col-md-2 hidden"><input type="hidden" class="form-control form-control-1" disabled name="' + k.tag + '_pres" value="" data-unit="mBar" /></div>';
           elmt += '<div class="col-md-2 hidden"><input type="hidden" class="form-control form-control-1" disabled name="' + k.tag + '_lux"  value="" data-unit="lx" /></div></div>';
         } else if (k.type == 'state') {
-          elmt += '<div class="row"><div class="col-md-2"><input type="text" class="form-control form-control-1" name="' + k.tag + '"/></div>';
-          elmt += '<div class="col-md-2"><input type="hidden" class="form-control form-control-0"  disabled name="' + k.tag + '_state"/></div></div>';
+          elmt += '<div class="row"><div class="col-md-4"><input type="text" class="form-control form-control-1" name="' + k.tag + '"/></div>';
+          elmt += '<div class="col-md-2 hidden"><input type="text" class="form-control form-control-0"  disabled name="' + k.tag + '_state"/></div></div>';
         } else {
           elmt += '<input type="text" class="form-control" name="' + k.tag + '"/>';
         }

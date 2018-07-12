@@ -75,6 +75,39 @@ int numUdpServers = 0;
 MiLightUdpServer** udpServers = NULL;
 WiFiUDP udpSeder;
 
+//setting pins for read use
+void pinInit() {
+  if(settings.mqttPin1 > 0 || settings.mqttPin2 > 0 || settings.mqttPin3 > 0 || settings.mqttPin4 > 0 ){
+    pinState[0] = 1;
+
+    aktPin[1] = settings.mqttPin1 ;
+    aktPin[2] = settings.mqttPin2 ;
+    aktPin[3] = settings.mqttPin3 ;
+    aktPin[4] = settings.mqttPin4 ;
+
+    sensors.sensorPins = 0;
+    for( uint8_t i = 1 ; i <= 4 ; i++){
+      Serial.print("MQTT Pin ");
+      Serial.print(i);
+      Serial.print(" : ");
+      Serial.print(aktPin[i]);
+      if(aktPin[i] > 0 ){
+        pinMode(aktPin[i], INPUT);
+        Serial.println(" > activated");
+        pinState[i] = -1 ;
+        sensors.sensorPins++;
+      }else{
+        Serial.println(" > inactiv");
+        pinState[i] = -2 ;
+      }
+    }
+  }else{
+      Serial.println("No Pins for transmitting enabled");
+  }
+}
+
+
+
 /**
  * Set up UDP servers (both v5 and v6).  Clean up old ones if necessary.
  */
@@ -229,6 +262,8 @@ void applySettings() {
     delete stateStore;
   }
 
+  pinInit();
+
   radioFactory = MiLightRadioFactory::fromSettings(settings);
 
   if (radioFactory == NULL) {
@@ -270,6 +305,7 @@ void applySettings() {
     ledStatus->changePin(settings.ledPin);
     ledStatus->continuous(settings.ledModeOperating);
   }
+
 }
 
 /**
@@ -478,33 +514,7 @@ void setup() {
   }
 
   Serial.println("Init Pin Read");
-  if(settings.mqttPin1 > 0 || settings.mqttPin2 > 0 || settings.mqttPin3 > 0 || settings.mqttPin4 > 0 ){
-    pinState[0] = 1;
-
-    aktPin[1] = settings.mqttPin1 ;
-    aktPin[2] = settings.mqttPin2 ;
-    aktPin[3] = settings.mqttPin3 ;
-    aktPin[4] = settings.mqttPin4 ;
-
-
-    for( uint8_t i = 1 ; i <= 4 ; i++){
-      Serial.print("MQTT Pin ");
-      Serial.print(i);
-      Serial.print(" : ");
-      Serial.print(aktPin[i]);
-      if(aktPin[i] > 0 ){
-        pinMode(aktPin[i], INPUT);
-        Serial.println(" > activated");
-        pinState[i] = -1 ;
-        sensors.sensorPins++;
-      }else{
-        Serial.println(" > inactiv");
-        pinState[i] = -2 ;
-      }
-    }
-  }else{
-      Serial.println("No Pins for transmitting enabled");
-  }
+  pinInit();
 
 
   Serial.println(F("Init Over the Air Update Service"));
