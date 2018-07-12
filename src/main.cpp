@@ -409,7 +409,7 @@ void setup() {
         Serial.print("EEPROM Hostname: ");
         Serial.println(staticHostName);
         Serial.println("Saving own Hostname to EEPROM");
-        for (int i = 0; i < settings.hostname.length(); ++i){
+        for (u_int i = 0; i < settings.hostname.length(); ++i){
             EEPROM.write(i, settings.hostname[i]);
         }
         for (int i = settings.hostname.length() ; i < 32 ; ++i){
@@ -561,6 +561,8 @@ void setup() {
   httpServer->begin();
 
   Serial.printf_P(PSTR("Setup complete (version %s)\n"), QUOTE(MILIGHT_HUB_VERSION));
+
+  i2cRead();
 }
 
 void loop() {

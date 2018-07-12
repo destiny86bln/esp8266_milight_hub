@@ -234,9 +234,7 @@ var UI_FIELDS = [ {
     help: "Number of times the LED will flash when packets are changing",
     type: "string",
     tab: "tab-led"
-  },
-
- {
+  }, {
     tag: "ota_password",
     friendly: "OTA Password",
     help: "Password for over the Air controler firmware update",
@@ -266,31 +264,7 @@ var UI_FIELDS = [ {
     help: "Gateway for static Wifi configuration",
     type: "string",
     tab: "tab-wifi"
-  }, {
-    tag: "mqtt_pin1",
-    friendly: "Status pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange)",
-    type: "string",
-    tab: "tab-sensor"
-  }, {
-    tag: "mqtt_pin2",
-    friendly: "Status pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange)",
-    type: "string",
-    tab: "tab-sensor"
-  }, {
-    tag: "mqtt_pin3",
-    friendly: "Status pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange)",
-    type: "string",
-    tab: "tab-sensor"
-  }, {
-    tag: "mqtt_pin4",
-    friendly: "Status pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange)",
-    type: "string",
-    tab: "tab-sensor"
-  }, {
+  } , {
     tag: "sda_pin",
     friendly: "SDA pin",
     help: "'SDA' for I2C interface (nodemcu : D2 > 4)",
@@ -325,6 +299,30 @@ var UI_FIELDS = [ {
     friendly: "State Pins",
     help: "configured digital state pin sensors",
     type: "sensor",
+    tab: "tab-sensor"
+  }, {
+    tag: "mqtt_pin_1",
+    friendly: "first State pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange) D5 = 14",
+    type: "state",
+    tab: "tab-sensor"
+  }, {
+    tag: "mqtt_pin_2",
+    friendly: "second Status pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange) D6 = 12",
+    type: "state",
+    tab: "tab-sensor"
+  }, {
+    tag: "mqtt_pin_3",
+    friendly: "third Status pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange) D7 = 13",
+    type: "state",
+    tab: "tab-sensor"
+  }, {
+    tag: "mqtt_pin_4",
+    friendly: "fourth Status pin",
+    help: "send pin state of this pin to mqtt (immediately on statechange) D8 = 15",
+    type: "state",
     tab: "tab-sensor"
   }
 ];
@@ -480,6 +478,7 @@ var loadSettings = function() {
       var field = $('#settings input[name="' + k + '"]');
 
       if (field.length > 0) {
+
         if (field.attr('type') === 'radio') {
           field.filter('[value="' + val[k] + '"]').click();
         } else {
@@ -540,23 +539,45 @@ var loadSettings = function() {
 
 
 var loadSensors = function() {
+  console.log('sensor state request');
   $.getJSON('/sensors', function(val) {
     Object.keys(val).forEach(function(k) {
       var field = $('#settings input[name="' + k + '"]');
+      console.log("sensor data for " + k );
       if (field.length > 0) {
-          if(field.prop('disabled')){
-              if(val[k] == true ){
-                field.addClass('bg-success');
-                field.val("found");
-              }else{
-                field.addClass('bg-danger');
-                field.val("not detected");
-              }
-          }else{
-            field.val(val[k]);
-          }
+        console.log("field found ");
+        if(val[k] === true ){
+          console.log("state is TRUE ");
+          field.css("background-color", "#28a745");
+          field.val("found");
+        }else if(val[k] === false ){
+          console.log("state is FALSE ");
+          field.css("background-color", "#dc3545");
+          field.val("not detected");
+        }else if(val[k] === "" ){
+          console.log("state is empty ");
+        }else{
+          console.log("state is string or int ");
+           if(field.attr('type') == 'hidden' ){
+              console.log("type is hidden");
+              field.attr('type' , 'text');
+              field.parent().removeClass('hidden');
+            }else{
+              console.log("type something else then hidden");
+            }
+
+            if(field.attr("data-unit")){
+              console.log("value has unit");
+              field.val(val[k] + ' ' + field.data("unit"));
+            }else{
+              console.log("value without unit");
+              field.val(val[k]);
+           }
+           console.log('full value is ' + field.val());
+         }
       }
     });
+    console.log('sensor states updated');
   });
 };
 
@@ -978,7 +999,14 @@ $(function() {
             '</label>' +
           '</div>';
         } else if (k.type == 'sensor') {
-          elmt += '<input type="text" class="form-control"  disabled name="' + k.tag + '"/>';
+          elmt += '<div class="row"><div class="col-md-2"><input type="text" class="form-control form-control-1"  disabled name="' + k.tag + '"/></div>';
+          elmt += '<div class="col-md-2 hidden"><input type="hidden" class="form-control form-control-1" disabled name="' + k.tag + '_temp" value="" data-unit="°C" /></div>';
+          elmt += '<div class="col-md-2 hidden"><input type="hidden" class="form-control form-control-1" disabled name="' + k.tag + '_hum"  value="" data-unit="% rH" /></div>';
+          elmt += '<div class="col-md-2 hidden"><input type="hidden" class="form-control form-control-1" disabled name="' + k.tag + '_pres" value="" data-unit="mBar" /></div>';
+          elmt += '<div class="col-md-2 hidden"><input type="hidden" class="form-control form-control-1" disabled name="' + k.tag + '_lux"  value="" data-unit="lx" /></div></div>';
+        } else if (k.type == 'state') {
+          elmt += '<div class="row"><div class="col-md-2"><input type="text" class="form-control form-control-1" name="' + k.tag + '"/></div>';
+          elmt += '<div class="col-md-2"><input type="hidden" class="form-control form-control-0"  disabled name="' + k.tag + '_state"/></div></div>';
         } else {
           elmt += '<input type="text" class="form-control" name="' + k.tag + '"/>';
         }
@@ -986,7 +1014,13 @@ $(function() {
 
         settings += elmt;
       }
+
+
+
     });
+    if(t.tag == 'tab-sensor'){
+      settings += '<button class="btn gateway-add-btn" id="sensors-refresh-btn"> <i class="glyphicon glyphicon-refresh"></i> </button>';
+    }
     settings += "</div>";
   });
 
@@ -1069,6 +1103,15 @@ $(function() {
   });
 
   $('#updates-btn').click(handleCheckForUpdates);
+
+
+
+  $('body').on('click', '#sensors-refresh-btn', function(e) {
+    e.preventDefault();
+    loadSensors();
+    console.log('sensor refresh request');
+  });
+
 
   loadSettings();
   loadSensors();
