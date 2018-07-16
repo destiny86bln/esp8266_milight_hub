@@ -50,6 +50,8 @@ public:
   String sensorPinStates;
   uint8_t sensorPins;
 
+protected:
+  
   template <typename T>
   void setIfPresent(JsonObject& obj, const char* key, T& var) {
     if (obj.containsKey(key)) {

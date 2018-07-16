@@ -16,7 +16,11 @@ void Names::deserialize(Names& names, String json) {
 
 void Names::patch(JsonObject& parsedNames) {
   if (parsedNames.success()) {
-    this->setIfPresent(parsedNames, "device_names", deviceNames);
+    this->setIfPresent<String>(parsedNames, "device_names", deviceNames);
+
+    if (parsedNames.containsKey("device_names")) {
+      this->deviceNames = parsedNames["device_names"].as<String>();
+    }
   }
 }
 

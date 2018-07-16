@@ -24,6 +24,8 @@ public:
   void patch(JsonObject& obj);
 
   String deviceNames;
+  
+protected:
 
   template <typename T>
   void setIfPresent(JsonObject& obj, const char* key, T& var) {
