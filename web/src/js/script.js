@@ -621,18 +621,11 @@ var loadSettings = function() {
 
 var loadNames = function() {
   $('select.select-init').selectpicker();
-  if (location.hostname == "") {
-    // if deugging locally, don't try get settings
-    return;
-  }
   $.getJSON('/name_configs', function(val) {
     if (val.device_names) {
-      val.device_names = JSON.parse(val.device_names);
       val.device_names.forEach(function(v) {
         var form = $("#device-names-" + v[0] ); // just focus to right sub section
         $('input[name="deviceNames[]"]', form).val(v[1]);
-
-        // todo
         $.each(MODES, function( m ) {
           var channel_names = v[2][m];
           if(channel_names){
@@ -695,31 +688,32 @@ var loadSensors = function() {
 var saveDeviceNames= function() {
   var deviceData = [];
   var ii = 0;
+  var clean = true;
   $('#device-names-form > table > tbody').each(function( i , v ) {
     var id = $(v).data('deviceid');
-    var val = null;
-    if($('input[name="deviceNames[]"]', v ).val()){
-      val =  $('input[name="deviceNames[]"]', v ).val();
-    }
-    var cha = {};
-    var idx=0;
-    $.each(MODES , function( m ) {
-      console.log('m > ' + m);
-      console.log('idx > ' + idx);
-      var ch = [] ;
-      $('input[name="channelNames'+m+'[]"]', v ).map(function( i , v ) {
-        if($(v).val()){
-          ch[i] = $(v).val();
-        }else{
-          ch[i] = null;
+    if(id != null){
+      var val = null;
+      if($('input[name="deviceNames[]"]', v ).val()){
+        val =  $('input[name="deviceNames[]"]', v ).val();
+      }
+      var cha = {};
+      $.each(MODES , function( m ) {
+        var ch = [] ;
+        $('input[name="channelNames'+m+'[]"]', v ).map(function( i , v ) {
+          if($(v).val()){
+            ch[i] = $(v).val();
+          }
+        });
+        if(ch.length){
+          cha[m] = ch;
         }
       });
-      cha[idx++] = [ m , ch ] ;
-    });
-    if(typeof val != 'undefined' ){
-      deviceData[ii++] = [ id , val , cha] ;
+      if(typeof val != 'undefined' ){
+        deviceData[ii++] = [ id , val , cha ] ;
+      }
     }
   });
+
 
   $.ajax(
     '/name_configs',
@@ -728,7 +722,17 @@ var saveDeviceNames= function() {
       contentType: 'application/json',
       data: JSON.stringify({device_names: deviceData})
     }
-  )
+  ).done(function() {
+    console.log('Transmission completed');
+  }).fail(function(e, d) {
+    alert('ERROR! Somehing went wrong! See Console Log');
+    console.log(e);
+    console.log(d);
+    console.log('JSON parsed : ');
+    console.log(JSON.stringify({device_names: deviceData}));
+
+  });
+
 };
 
 
