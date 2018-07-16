@@ -3,6 +3,7 @@
 #include <IntParsing.h>
 #include <Settings.h>
 #include <Sensors.h>
+#include <Names.h>
 
 #include <MiLightHttpServer.h>
 #include <MiLightRadioConfig.h>
@@ -21,6 +22,11 @@ void MiLightHttpServer::begin() {
   server.onAuthenticated("/settings", HTTP_GET, [this]() { serveSettings(); });
   server.onAuthenticated("/settings", HTTP_PUT, [this]() { handleUpdateSettings(); });
   server.onAuthenticated("/settings", HTTP_POST, [this]() { handleUpdateSettingsPost(); }, handleUpdateFile(SETTINGS_FILE));
+
+  server.onAuthenticated("/name_configs", HTTP_GET, [this]() { serveNames(); });
+  server.onAuthenticated("/name_configs", HTTP_PUT, [this]() { handleUpdateNames(); });
+  server.onAuthenticated("/name_configs", HTTP_POST, [this]() { handleUpdateNamesPost(); }, handleUpdateFile(NAMES_FILE));
+
   server.onAuthenticated("/radio_configs", HTTP_GET, [this]() { handleGetRadioConfigs(); });
 
   server.onAuthenticated("/gateway_traffic", HTTP_GET, [this]() { handleListenGateway(NULL); });
@@ -104,6 +110,10 @@ void MiLightHttpServer::serveSettings() {
   serveFile(SETTINGS_FILE, APPLICATION_JSON);
 }
 
+void MiLightHttpServer::serveNames() {
+  names.save();
+  serveFile(NAMES_FILE, APPLICATION_JSON);
+}
 
 void MiLightHttpServer::serveSensors() {
   // Save first to set defaults
@@ -197,6 +207,8 @@ ESP8266WebServer::THandlerFunction MiLightHttpServer::handleUpdateFile(const cha
   };
 }
 
+
+
 void MiLightHttpServer::handleUpdateSettings() {
   DynamicJsonBuffer buffer;
   const String& rawSettings = server.arg("plain");
@@ -220,8 +232,35 @@ void MiLightHttpServer::handleUpdateSettings() {
   }
 }
 
+
+void MiLightHttpServer::handleUpdateNames() {
+  DynamicJsonBuffer buffer;
+  const String& rawNames = server.arg("plain");
+  JsonObject& parsedNames = buffer.parse(rawNames);
+
+  if (parsedNames.success()) {
+    names.patch(parsedNames);
+    names.save();
+
+    if (this->namesSavedHandler) {
+      this->namesSavedHandler();
+    }
+
+    server.send(200, APPLICATION_JSON, "true");
+    Serial.println(F("Names successfully updated"));
+  } else {
+    server.send(400, APPLICATION_JSON, "\"Invalid JSON\"");
+    Serial.println(F("Names failed to update; invalid JSON"));
+  }
+}
+
 void MiLightHttpServer::handleUpdateSettingsPost() {
   Settings::load(settings);
+  server.send_P(200, TEXT_PLAIN, PSTR("success."));
+}
+
+void MiLightHttpServer::handleUpdateNamesPost() {
+  Names::load(names);
   server.send_P(200, TEXT_PLAIN, PSTR("success."));
 }
 
@@ -239,7 +278,7 @@ void MiLightHttpServer::handleFirmwarePost() {
     server.send_P(
       200,
       TEXT_PLAIN,
-      PSTR("Success. Device will now reboot.")
+      PSTR("<meta http-equiv=refresh content=5 >Success. Device will now reboot.")
     );
   }
 

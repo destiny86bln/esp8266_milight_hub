@@ -65,6 +65,7 @@ void Settings::updateGatewayConfigs(JsonArray& arr) {
   }
 }
 
+
 void Settings::updateGroupStateFields(JsonArray &arr) {
   if (arr.success()) {
     if (this->groupStateFields) {
@@ -124,6 +125,7 @@ void Settings::patch(JsonObject& parsedSettings) {
     this->setIfPresent(parsedSettings, "ota_pass", otaPass);
     this->setIfPresent(parsedSettings, "mqtt_client_id", mqttClientId);
     this->setIfPresent(parsedSettings, "mqtt_sensor_topic_pattern", mqttSensorTopicPattern);
+
 
     if (parsedSettings.containsKey("led_mode_wifi_config")) {
       this->ledModeWifiConfig = LEDStatus::stringToLEDMode(parsedSettings["led_mode_wifi_config"]);
@@ -238,6 +240,7 @@ void Settings::serialize(Stream& stream, const bool prettyPrint) {
   root["ota_pass"] = this->otaPass;
   root["mqtt_client_id"] = this->mqttClientId;
   root["mqtt_sensor_topic_pattern"] = this->mqttSensorTopicPattern;
+
 
   if (this->deviceIds) {
     JsonArray& arr = jsonBuffer.createArray();

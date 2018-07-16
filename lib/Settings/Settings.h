@@ -188,6 +188,7 @@ public:
   String mqttClientId;
   String mqttSensorTopicPattern;
 
+
 protected:
   size_t _autoRestartPeriod;
 

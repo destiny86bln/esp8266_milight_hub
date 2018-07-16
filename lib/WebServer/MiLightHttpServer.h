@@ -2,6 +2,7 @@
 #include <MiLightClient.h>
 #include <Settings.h>
 #include <Sensors.h>
+#include <Names.h>
 
 #include <WebSocketsServer.h>
 #include <GroupStateStore.h>
@@ -12,18 +13,20 @@
 #define MAX_DOWNLOAD_ATTEMPTS 3
 
 typedef std::function<void(void)> SettingsSavedHandler;
+typedef std::function<void(void)> NamesSavedHandler;
 
 const char TEXT_PLAIN[] PROGMEM = "text/plain";
 const char APPLICATION_JSON[] = "application/json";
 
 class MiLightHttpServer {
 public:
-  MiLightHttpServer(Settings& settings, Sensors& sensors, MiLightClient*& milightClient, GroupStateStore*& stateStore)
+  MiLightHttpServer(Settings& settings, Sensors& sensors, Names& names, MiLightClient*& milightClient, GroupStateStore*& stateStore)
     : server(80),
       wsServer(WebSocketsServer(81)),
       numWsClients(0),
       milightClient(milightClient),
       settings(settings),
+      names(names),
       sensors(sensors),
       stateStore(stateStore)
   {
@@ -44,6 +47,7 @@ protected:
     const char* defaultText = NULL);
 
   void serveSettings();
+  void serveNames();
   void serveSensors();
   bool serveFile(const char* file, const char* contentType = "text/html");
   ESP8266WebServer::THandlerFunction handleUpdateFile(const char* filename);
@@ -52,7 +56,9 @@ protected:
   void sendGroupState(BulbId& bulbId, GroupState& state);
 
   void handleUpdateSettings();
+  void handleUpdateNames();
   void handleUpdateSettingsPost();
+  void handleUpdateNamesPost();
   void handleGetRadioConfigs();
   void handleAbout();
   void handleSystemPost();
@@ -71,10 +77,12 @@ protected:
   WebServer server;
   WebSocketsServer wsServer;
   Settings& settings;
+  Names& names;
   Sensors& sensors;
   MiLightClient*& milightClient;
   GroupStateStore*& stateStore;
   SettingsSavedHandler settingsSavedHandler;
+  NamesSavedHandler namesSavedHandler;
   size_t numWsClients;
   ESP8266WebServer::THandlerFunction _handleRootPage;
 

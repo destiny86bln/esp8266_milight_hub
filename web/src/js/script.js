@@ -360,6 +360,9 @@ var LED_MODES = [
 
 var UDP_PROTOCOL_VERSIONS = [ 5, 6 ];
 var DEFAULT_UDP_PROTOCL_VERSION = 5;
+var LAST_DEVICE = "";
+var LAST_MODE = "";
+var MODES = { "rgb" : 0 , "rgbw" : 4 , "cct" : 4 , "rgb_cct" : 4 , "fut089" : 8 };
 
 var selectize;
 var sniffing = false;
@@ -379,10 +382,39 @@ var toHex = function(v) {
   return "0x" + (v).toString(16).toUpperCase();
 }
 
+var loadDeviceNames = function(deviceId){
+  $('#device-names-' + LAST_DEVICE ).addClass('hidden');
+  $('#device-names-' + deviceId ).removeClass('hidden');
+  loadChannelNames(deviceId);
+  LAST_DEVICE = deviceId;
+}
+
+
+var loadChannelNames = function(deviceId){
+  var mode = getCurrentMode();
+
+  for(var i = 0  ; i <= MODES[LAST_MODE]  ; i++){
+    $('#channel-names-' + LAST_DEVICE + '-' + LAST_MODE + '-' + i ).addClass('hidden');
+    $('#channel-names-' + LAST_DEVICE + '-' + LAST_MODE + '-' + i ).removeClass('info');
+  }
+
+  for(var i = 0  ; i <= MODES[mode]  ; i++){
+    $('#channel-names-' + deviceId + '-' + mode + '-' + i ).removeClass('hidden');
+    if(i ==  $('#groupId .active input').data('value')){
+      $('#channel-names-' + deviceId +  '-' + mode + '-' + i ).addClass('info');
+    }
+  }
+  LAST_MODE = mode;
+}
+
+
+
 var activeUrl = function() {
   var deviceId = $('#deviceId option:selected').val()
     , groupId = $('#groupId .active input').data('value')
     , mode = getCurrentMode();
+
+    loadDeviceNames(parseInt(deviceId));
 
   if (deviceId == "") {
     throw "Must enter device ID";
@@ -436,8 +468,50 @@ var sendCommand = _.throttle(
   1000
 )
 
+
+var channelNameRow = function(deviceId , mode , channel ) {
+  var elmt = '<tr id="channel-names-' + deviceId + '-' + mode + '-' + channel + '" class="hidden" >';
+  elmt += '<td>';
+  elmt += '</td>';
+  elmt += '<td>';
+  elmt += '<input disabled class="form-control" value="' + mode + '"/>';
+  if(channel > 0){
+    elmt += '<input disabled class="form-control" value="' + channel + '"/>';
+  }else{
+    elmt += '<input disabled class="form-control" value="all"/>';
+  }
+  elmt += '</td>';
+  elmt += '<td colspan=2>'
+  elmt += '<input name="channelNames'+mode+'[]" class="form-control" value=""/>';
+  elmt += '</td>';
+  elmt += '</tr>';
+  return elmt;
+}
+
+
+var deviceNameRow = function( deviceId ) {
+  var deviceNamesForm = $('#device-names').html('');
+  var elmt = '<tr >';
+  elmt += '<td colspan=2 >';
+  // elmt += deviceId ;
+  elmt += '<input disabled class="form-control" value="' + toHex(deviceId) + '"/>';
+  elmt += '</td>';
+  elmt += '<td colspan=2>'
+  elmt += '<input name="deviceNames[]" class="form-control" value=""/>';;
+  elmt += '</td>';
+  elmt += '<td>';
+  elmt += '</tr>';
+  $('input[name="mode"]').map(function( i , v) {
+    var mode = $(v).data('value');
+    for(var i = 0  ; i <= MODES[mode]  ; i++){
+      elmt += channelNameRow(deviceId ,mode , i );
+    }
+  });
+  return '<tbody id="device-names-' + deviceId + '" data-deviceId="' + deviceId + '" class="hidden" >' + elmt + '</tbody>';
+}
+
 var gatewayServerRow = function(deviceId, port, version) {
-  var elmt = '<tr>';
+  var elmt = '<tr >';
   elmt += '<td>';
   elmt += '<input name="deviceIds[]" class="form-control" value="' + deviceId + '"/>';
   elmt += '</td>';
@@ -467,6 +541,8 @@ var gatewayServerRow = function(deviceId, port, version) {
   return elmt;
 }
 
+
+
 var loadSettings = function() {
   $('select.select-init').selectpicker();
   if (location.hostname == "") {
@@ -476,30 +552,28 @@ var loadSettings = function() {
   $.getJSON('/settings', function(val) {
     Object.keys(val).forEach(function(k) {
       var field = $('#settings input[name="' + k + '"]');
-
       if (field.length > 0) {
-
         if (field.attr('type') === 'radio') {
           field.filter('[value="' + val[k] + '"]').click();
         } else {
           field.removeClass('form-control-1');
           field.removeClass('form-control-2');
-          console.log('length of value from ' + k + ' is ' + val[k].length + ' value is ' + val[k] );
-          if(val[k].length > 20 ){
-
+          if(val[k].toString().length > 20 ){
             field.addClass('form-control-2');
-          }else if(val[k].length > 0 && val[k].length < 7 ){
+          }else if(val[k].toString().length > 0 && val[k].toString().length < 7 ){
             field.addClass('form-control-1');
           }
-
           field.val(val[k]);
         }
       }
     });
 
     if (val.device_ids) {
+      var deviceNamesForm = $('#device-name-configs').html('').parent();
       selectize.clearOptions();
       val.device_ids.forEach(function(v) {
+        deviceNamesForm.append(deviceNameRow(v));
+
         selectize.addOption({text: toHex(v), value: v});
       });
       selectize.refreshOptions();
@@ -536,53 +610,66 @@ var loadSettings = function() {
         gatewayForm.append(gatewayServerRow(toHex(v[0]), v[1], v[2]));
       });
     }
+
+
+  });
+};
+
+
+var loadNames = function() {
+  $('select.select-init').selectpicker();
+  if (location.hostname == "") {
+    // if deugging locally, don't try get settings
+    return;
+  }
+  $.getJSON('/name_configs', function(val) {
+    if (val.device_names) {
+      val.device_names = JSON.parse(val.device_names);
+      val.device_names.forEach(function(v) {
+        var form = $("#device-names-" + v[0] ); // just focus to right sub section
+        $('input[name="deviceNames[]"]', form).val(v[1]);
+
+        // todo
+        $.each(MODES, function( m ) {
+          var channel_names = v[2][m];
+          if(channel_names){
+            channel_names.forEach(function( k , i) {
+              $('input[name="channelNames'+m+'[]"]:eq(' + i + ')' , form).val(k);
+            });
+          }
+        });
+      });
+    }
   });
 };
 
 
 var loadSensors = function() {
-  console.log('sensor state request');
   $.getJSON('/sensors', function(val) {
     Object.keys(val).forEach(function(k) {
       var field = $('#settings input[name="' + k + '"]');
-      console.log("sensor data for " + k );
       if (field.length > 0) {
-        console.log("field found ");
         if(val[k] === true ){
-          console.log("state is TRUE ");
           field.css("background-color", "#28a745");
           field.val("found");
         }else if(val[k] === false ){
-          console.log("state is FALSE ");
           field.css("background-color", "#dc3545");
           field.val("not detected");
-        }else if(val[k] === "" ){
-          console.log("state is empty ");
         }else{
-          console.log("state is string or int ");
            if(field.attr('type') == 'hidden' ){
-              console.log("type is hidden");
               field.attr('type' , 'text');
               field.parent().removeClass('hidden');
-            }else{
-              console.log("type something else then hidden");
             }
 
             if(field.attr("data-unit")){
-              console.log("value has unit");
               field.val(val[k] + ' ' + field.data("unit"));
             }else{
-              console.log("value without unit");
               field.val(val[k]);
            }
-           console.log('full value is ' + field.val());
          }
-
       }else{
         if(k == 'sensor_pin_states'){
-          console.log("found pin state stack");
           $.each(val[k].split(';') , function( index, value ) {
-            console.log("pin state for index " + index + " is " + value);
             var field = $('#settings input[name="mqtt_pin_' + ( index + 1 ) + '_state"]');
             if(value == 1 ){
               field.parent().removeClass('hidden');
@@ -594,15 +681,54 @@ var loadSensors = function() {
               field.val("low");
             }else{
               field.parent().addClass('hidden');
-
             }
           });
         }
       }
     });
-    console.log('sensor states updated');
   });
 };
+
+var saveDeviceNames= function() {
+  var deviceData = [];
+  var ii = 0;
+  $('#device-names-form > table > tbody').each(function( i , v ) {
+    var id = $(v).data('deviceid');
+    var val = null;
+    if($('input[name="deviceNames[]"]', v ).val()){
+      val =  $('input[name="deviceNames[]"]', v ).val();
+    }
+    //todo
+    var cha = {};
+    var idx=0;
+    $.each(MODES , function( m ) {
+      console.log('m > ' + m);
+      console.log('idx > ' + idx);
+      var ch = [] ;
+      $('input[name="channelNames'+m+'[]"]', v ).map(function( i , v ) {
+        if($(v).val()){
+          ch[i] = $(v).val();
+        }else{
+          ch[i] = null;
+        }
+      });
+      cha[idx++] = [ m , ch ] ;
+    });
+    if(typeof val != 'undefined' ){
+      deviceData[ii++] = [ id , val , cha] ;
+    }
+  });
+
+  $.ajax(
+    '/name_configs',
+    {
+      method: 'put',
+      contentType: 'application/json',
+      data: JSON.stringify({device_names: deviceData})
+    }
+  )
+};
+
 
 var saveGatewayConfigs = function() {
   var form = $('#tab-udp-gateways')
@@ -904,7 +1030,6 @@ $(function() {
 
   $('body').on('click', '#add-server-btn', function(e) {
     e.preventDefault();
-    console.log('hi');
     $('#gateway-server-configs').append(gatewayServerRow('', ''));
   });
 
@@ -1114,6 +1239,12 @@ $(function() {
     return false;
   });
 
+  $('#device-names-form').submit(function(e) {
+    saveDeviceNames();
+    e.preventDefault();
+    return false;
+  });
+
   $('.field-help').each(function() {
     var elmt = $('<i></i>')
       .addClass('glyphicon glyphicon-question-sign')
@@ -1132,11 +1263,11 @@ $(function() {
   $('body').on('click', '#sensors-refresh-btn', function(e) {
     e.preventDefault();
     loadSensors();
-    console.log('sensor refresh request');
   });
 
 
   loadSettings();
   loadSensors();
+  loadNames();
   updateModeOptions();
 });

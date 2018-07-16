@@ -12,6 +12,7 @@
 #include <MiLightHttpServer.h>
 #include <Settings.h>
 #include <Sensors.h>
+#include <Names.h>
 
 #include <MiLightUdpServer.h>
 #include <ESP8266mDNS.h>
@@ -59,6 +60,7 @@ static LEDStatus *ledStatus;
 
 Settings settings;
 Sensors sensors;
+Names names;
 
 MiLightClient* milightClient = NULL;
 MiLightRadioFactory* radioFactory = NULL;
@@ -435,6 +437,7 @@ void setup() {
   applySettings();
 
   Sensors::load(sensors);
+  Names::load(names);
 
 
 // Aditional setup for features
@@ -565,7 +568,7 @@ void setup() {
   SSDP.setDeviceType("upnp:rootdevice");
   SSDP.begin();
 
-  httpServer = new MiLightHttpServer(settings, sensors, milightClient, stateStore);
+  httpServer = new MiLightHttpServer(settings, sensors, names , milightClient, stateStore);
   httpServer->onSettingsSaved(applySettings);
   httpServer->on("/description.xml", HTTP_GET, []() { SSDP.schema(httpServer->client()); });
   httpServer->begin();
