@@ -279,17 +279,14 @@ void MiLightHttpServer::handleFirmwarePost() {
   server.sendHeader("Access-Control-Allow-Origin", "*");
 
   if (Update.hasError()) {
-    server.send_P(
-      500,
-      TEXT_PLAIN,
-      PSTR("Failed updating firmware. Check serial logs for more information. You may need to re-flash the device.")
-    );
+    server.send_P( 500, TEXT_PLAIN, PSTR("Failed updating firmware. Check serial logs for more information. You may need to re-flash the device.") );
   } else {
-    server.send_P(
-      200,
-      TEXT_PLAIN,
-      PSTR("<meta http-equiv=refresh content=60 >Success. Device will now reboot.")
-    );
+    server.sendHeader("Content-Encoding", "gzip");
+    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server.send(200, "text/html", "");
+    server.sendContent("<html><head><meta http-equiv=refresh content=60 ></head><body>Success. Device will now reboot.</body></html>");
+
+    //server.send_P( 200 , TEXT_PLAIN , PSTR("Success. Device will now reboot.") );
   }
 
   delay(1000);

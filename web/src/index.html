@@ -469,13 +469,22 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
+           <h2 class="modal-title">Backup & Restore</h2>
         </div>
         <div class="modal-body">
           <div>
             <h3 class="section-title">Backup Settings</h3>
             <a href="/settings" download="settings.json" class="btn btn-primary">Backup Settings</a>
+            <a href="/name_configs" download="device_names.json" class="btn btn-primary">Backup Device Name Settings</a>
           </div>
-
+          <div>
+            <h3 class="section-title">Download radio Config</h3>
+            <a href="/radio_configs" download="radios.json" class="btn btn-primary">Download Radio Config</a>
+          </div>
+          <div>
+            <h3 class="section-title">Download current Sensor Data</h3>
+            <a href="/sensors" download="sensors.json" class="btn btn-primary">Download Sensor Data</a>
+          </div>
           <div>
             <h3 class="section-title">Restore Settings</h3>
             <form action="/settings" method="post" enctype="multipart/form-data">
@@ -487,7 +496,17 @@
               </p>
             </form>
           </div>
+          <h3 class="section-title">Restore Device Name Settings</h3>
+          <form action="/name_configs" method="post" enctype="multipart/form-data">
+            <p>
+              <input type="file" name="file"/>
+            </p>
+            <p>
+              <input type="submit" name="submit" class="btn btn-success"/>
+            </p>
+          </form>
         </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
