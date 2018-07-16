@@ -385,6 +385,7 @@ var toHex = function(v) {
 var loadDeviceNames = function(deviceId){
   $('#device-names-' + LAST_DEVICE ).addClass('hidden');
   $('#device-names-' + deviceId ).removeClass('hidden');
+  $('input[name="deviceMode[]"]' , '#device-names-' + deviceId ).val(getCurrentMode());
   loadChannelNames(deviceId);
   LAST_DEVICE = deviceId;
 }
@@ -471,10 +472,9 @@ var sendCommand = _.throttle(
 
 var channelNameRow = function(deviceId , mode , channel ) {
   var elmt = '<tr id="channel-names-' + deviceId + '-' + mode + '-' + channel + '" class="hidden" >';
-  elmt += '<td>';
+  elmt += '<td colspan=2 >';
   elmt += '</td>';
   elmt += '<td>';
-  elmt += '<input disabled class="form-control" value="' + mode + '"/>';
   if(channel > 0){
     elmt += '<input disabled class="form-control" value="' + channel + '"/>';
   }else{
@@ -492,9 +492,12 @@ var channelNameRow = function(deviceId , mode , channel ) {
 var deviceNameRow = function( deviceId ) {
   var deviceNamesForm = $('#device-names').html('');
   var elmt = '<tr >';
-  elmt += '<td colspan=2 >';
+  elmt += '<td >';
   // elmt += deviceId ;
   elmt += '<input disabled class="form-control" value="' + toHex(deviceId) + '"/>';
+  elmt += '</td>';
+  elmt += '<td colspan=2>';
+  elmt += '<input disabled class="form-control" name="deviceMode[]" style="text-align: center;" value=""/>';
   elmt += '</td>';
   elmt += '<td colspan=2>'
   elmt += '<input name="deviceNames[]" class="form-control" value=""/>';;
@@ -698,7 +701,6 @@ var saveDeviceNames= function() {
     if($('input[name="deviceNames[]"]', v ).val()){
       val =  $('input[name="deviceNames[]"]', v ).val();
     }
-    //todo
     var cha = {};
     var idx=0;
     $.each(MODES , function( m ) {

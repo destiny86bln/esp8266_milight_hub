@@ -19,6 +19,7 @@ void MiLightHttpServer::begin() {
   _handleRootPage = handleServe_P(index_html_gz, index_html_gz_len);
   server.onAuthenticated("/", HTTP_GET, [this]() { _handleRootPage(); });
   server.onAuthenticated("/sensors", HTTP_GET, [this]() { serveSensors(); });
+
   server.onAuthenticated("/settings", HTTP_GET, [this]() { serveSettings(); });
   server.onAuthenticated("/settings", HTTP_PUT, [this]() { handleUpdateSettings(); });
   server.onAuthenticated("/settings", HTTP_POST, [this]() { handleUpdateSettingsPost(); }, handleUpdateFile(SETTINGS_FILE));
@@ -111,6 +112,7 @@ void MiLightHttpServer::serveSettings() {
 }
 
 void MiLightHttpServer::serveNames() {
+  Serial.println(F("Serving names file"));
   names.save();
   serveFile(NAMES_FILE, APPLICATION_JSON);
 }
@@ -182,8 +184,14 @@ ESP8266WebServer::THandlerFunction MiLightHttpServer::handleServeFile(
 
 bool MiLightHttpServer::serveFile(const char* file, const char* contentType) {
   if (SPIFFS.exists(file)) {
+    Serial.println(F("Reading File from FS "));
+    Serial.println(file);
     File f = SPIFFS.open(file, "r");
     server.streamFile(f, contentType);
+
+    Serial.println(F("File contents "));
+    Serial.println(f.readStringUntil('\0'));
+
     f.close();
     return true;
   }
@@ -234,6 +242,8 @@ void MiLightHttpServer::handleUpdateSettings() {
 
 
 void MiLightHttpServer::handleUpdateNames() {
+  Serial.println(F("Updateing names file"));
+
   DynamicJsonBuffer buffer;
   const String& rawNames = server.arg("plain");
   JsonObject& parsedNames = buffer.parse(rawNames);
@@ -278,7 +288,7 @@ void MiLightHttpServer::handleFirmwarePost() {
     server.send_P(
       200,
       TEXT_PLAIN,
-      PSTR("<meta http-equiv=refresh content=5 >Success. Device will now reboot.")
+      PSTR("<meta http-equiv=refresh content=60 >Success. Device will now reboot.")
     );
   }
 
