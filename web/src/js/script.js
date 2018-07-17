@@ -623,6 +623,9 @@ var loadNames = function() {
   $('select.select-init').selectpicker();
   $.getJSON('/name_configs', function(val) {
     if (val.device_names) {
+      if(typeof(val.device_names) != 'object'){
+        val.device_names = JSON.parse(val.device_names);
+      }
       val.device_names.forEach(function(v) {
         var form = $("#device-names-" + v[0] ); // just focus to right sub section
         $('input[name="deviceNames[]"]', form).val(v[1]);
