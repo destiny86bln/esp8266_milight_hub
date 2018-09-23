@@ -32,12 +32,18 @@ var UI_TABS = [ {
 ];
 
 var UI_FIELDS = [ {
-    tag: "admin_username",
-    friendly: "Admin username",
-    help: "Username for logging into this webpage",
+    tag: "device_name",
+    friendly: "Device name / location",
+    help: "Headline for this device at this webpage",
     type: "string",
     tab: "tab-wifi"
   }, {
+      tag: "admin_username",
+      friendly: "Admin username",
+      help: "Username for logging into this webpage",
+      type: "string",
+      tab: "tab-wifi"
+    }, {
     tag: "admin_password",
     friendly: "Password",
     help: "Password for logging into this webpage",
@@ -295,6 +301,12 @@ var UI_FIELDS = [ {
     type: "sensor",
     tab: "tab-sensor"
   }, {
+    tag: "mqtt_push_interval",
+    friendly: "publish interval",
+    help: "time in ms for publishing sensordata in mqtt",
+    type: "string",
+    tab: "tab-sensor"
+  }, {
     tag: "sensor_pins",
     friendly: "State Pins",
     help: "configured digital state pin sensors",
@@ -303,25 +315,25 @@ var UI_FIELDS = [ {
   }, {
     tag: "mqtt_pin_1",
     friendly: "first State pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange) D5 = 14",
+    help: "send pin state of this pin to mqtt (immediately on statechange) SD3 = 10",
     type: "state",
     tab: "tab-sensor"
   }, {
     tag: "mqtt_pin_2",
     friendly: "second Status pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange) D6 = 12",
+    help: "send pin state of this pin to mqtt (immediately on statechange) D3 = 0",
     type: "state",
     tab: "tab-sensor"
   }, {
     tag: "mqtt_pin_3",
     friendly: "third Status pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange) D7 = 13",
+    help: "send pin state of this pin to mqtt (immediately on statechange) D4 = 2",
     type: "state",
     tab: "tab-sensor"
   }, {
     tag: "mqtt_pin_4",
     friendly: "fourth Status pin",
-    help: "send pin state of this pin to mqtt (immediately on statechange) D8 = 15",
+    help: "send pin state of this pin to mqtt (immediately on statechange) TX = 01 ; RX = 03",
     type: "state",
     tab: "tab-sensor"
   }
@@ -570,6 +582,10 @@ var loadSettings = function() {
         }
       }
     });
+
+    if(val.device_name){
+      $('#device-name').html(val.device_name);
+    }
 
     if (val.device_ids) {
       var deviceNamesForm = $('#device-name-configs').html('').parent();

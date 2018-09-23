@@ -511,7 +511,7 @@ void setup() {
           Serial.println("I2C BH1750 sensor detetected");
           sensors.sensorBH1750 = true;
       }
-      tmr.every(60000 , i2cRead);
+      tmr.every(settings.mqttPushInterval , i2cRead);
   }else{
       Serial.println("I2C not configured");
   }

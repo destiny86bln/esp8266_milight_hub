@@ -100,7 +100,26 @@ public:
     ledModeWifiFailed(LEDStatus::LEDMode::On),
     ledModeOperating(LEDStatus::LEDMode::SlowBlip),
     ledModePacket(LEDStatus::LEDMode::Flicker),
-    ledModePacketCount(3)
+    ledModePacketCount(3),
+  //Aditional vars
+    hostname(""),
+    otaPass(""),
+    staticIp(""),
+    staticMask(""),
+    staticGate(""),
+    sdaPin(0),
+    sclPin(0),
+    mqttPin1(0),
+    mqttPin2(0),
+    mqttPin3(0),
+    mqttPin4(0),
+    mqttClientId(""),
+    mqttPushInterval(60000),
+    deviceName("MiLight Hub")
+
+
+
+
   {
     if (groupStateFields == NULL) {
       numGroupStateFields = size(DEFAULT_GROUP_STATE_FIELDS);
@@ -187,7 +206,8 @@ public:
   uint8_t mqttPin4;
   String mqttClientId;
   String mqttSensorTopicPattern;
-
+  size_t mqttPushInterval;
+  String deviceName;
 
 protected:
   size_t _autoRestartPeriod;

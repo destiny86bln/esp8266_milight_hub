@@ -125,6 +125,8 @@ void Settings::patch(JsonObject& parsedSettings) {
     this->setIfPresent(parsedSettings, "ota_pass", otaPass);
     this->setIfPresent(parsedSettings, "mqtt_client_id", mqttClientId);
     this->setIfPresent(parsedSettings, "mqtt_sensor_topic_pattern", mqttSensorTopicPattern);
+    this->setIfPresent(parsedSettings, "mqtt_push_interval", mqttPushInterval);
+    this->setIfPresent(parsedSettings, "device_name", deviceName);
 
 
     if (parsedSettings.containsKey("led_mode_wifi_config")) {
@@ -240,6 +242,8 @@ void Settings::serialize(Stream& stream, const bool prettyPrint) {
   root["ota_pass"] = this->otaPass;
   root["mqtt_client_id"] = this->mqttClientId;
   root["mqtt_sensor_topic_pattern"] = this->mqttSensorTopicPattern;
+  root["mqtt_push_interval"] = this->mqttPushInterval;
+  root["device_name"] = this->deviceName;
 
 
   if (this->deviceIds) {
