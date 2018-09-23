@@ -445,7 +445,7 @@ var activeUrl = function() {
 }
 
 var getCurrentMode = function() {
-  return $('input[name="mode"]:checked').data('value');
+  return $('#mode li.active').data('value');
 };
 
 var updateGroup = _.throttle(
@@ -815,7 +815,10 @@ var deviceIdError = function(v) {
 };
 
 var updateModeOptions = function() {
-  var currentMode = getCurrentMode();
+  var currentMode = getCurrentMode()
+    , modeLabel = $('#mode li[data-value="' + currentMode + '"] a').html();
+
+  $('label', $('#mode').closest('.dropdown')).html(modeLabel);
 
   $('.mode-option').map(function() {
     if ($(this).data('for').split(',').includes(currentMode)) {
@@ -1058,7 +1061,14 @@ $(function() {
     $('#gateway-server-configs').append(gatewayServerRow('', ''));
   });
 
-  $('#mode').change(updateModeOptions);
+  $('#mode li').click(function(e) {
+    e.preventDefault();
+
+    $('li', $(this).parent()).removeClass('active');
+    $(this).addClass('active');
+
+    updateModeOptions.bind(this)();
+  });
 
   $('body').on('click', '.remove-gateway-server', function() {
     $(this).closest('tr').remove();

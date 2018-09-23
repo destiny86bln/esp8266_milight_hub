@@ -78,7 +78,7 @@
       </div>
 
       <div class="col-sm-4">
-        <div class="mode-option" id="group-option" data-for="cct,rgbw,rgb_cct,fut089">
+        <div class="mode-option" id="group-option" data-for="cct,rgbw,rgb_cct,fut089,fut091">
           <label for="groupId">Group</label>
 
           <div class="btn-group" id="groupId" data-toggle="buttons">
@@ -114,9 +114,9 @@
       </div>
 
       <div class="col-sm-4">
-        <label for="mode">Mode</label>
+        <label for="mode">Remote Type</label>
 
-        <div class="btn-group" id="mode" data-toggle="buttons">
+        <!-- <div class="btn-group" id="mode" data-toggle="buttons">
           <label class="btn btn-secondary active">
             <input type="radio" name="mode" autocomplete="off" data-value="rgbw" checked> RGBW
           </label>
@@ -132,6 +132,35 @@
           <label class="btn btn-secondary">
             <input type="radio" name="mode" autocomplete="off" data-value="fut089"> FUT089
           </label>
+          <label class="btn btn-secondary">
+            <input type="radio" name="mode" autocomplete="off" data-value="fut091"> FUT091
+          </label>
+        </div> -->
+        <div class="dropdown">
+          <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+            <label>Mode</label>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" id="mode">
+            <li data-value="rgbw">
+              <a href="#">RGBW</a>
+            </li>
+            <li data-value="cct">
+              <a href="#">CCT</a>
+            </li>
+            <li data-value="rgb_cct" class="active">
+              <a href="#">RGB+CCT</a>
+            </li>
+            <li data-value="rgb">
+              <a href="#">RGB</a>
+            </li>
+            <li data-value="fut089">
+              <a href="#">FUT089 / B8</a>
+            </li>
+            <li data-value="fut091">
+              <a href="#">FUT091 / B2</a>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -196,7 +225,7 @@
       </div>
     </div>
 
-    <div class="mode-option" data-for="cct,rgb_cct,fut089">
+    <div class="mode-option" data-for="cct,rgb_cct,fut089,fut091">
       <div class="row">
         <div class="col-sm-12">
           <h5>Color Temperature</h5>
@@ -404,7 +433,7 @@
             </p>
           </div>
           <form action="/firmware" method="post" enctype="multipart/form-data">
-            <input type="file" name="file"/>
+            <input type="file" name="firmware.bin" accept="*.bin"/>
             <p>&nbsp;</p>
             <input type="submit" name="submit" class="btn btn-success"/>
           </form>
@@ -490,7 +519,7 @@
             <h3 class="section-title">Restore Settings</h3>
             <form action="/settings" method="post" enctype="multipart/form-data">
               <p>
-                <input type="file" name="file"/>
+                <input type="file" name="settings.json" accept="*.json" />
               </p>
               <p>
                 <input type="submit" name="submit" class="btn btn-success"/>
@@ -500,7 +529,7 @@
           <h3 class="section-title">Restore Device Name Settings</h3>
           <form action="/name_configs" method="post" enctype="multipart/form-data">
             <p>
-              <input type="file" name="file"/>
+              <input type="file" name="device_names.json" accept="*.json"/>
             </p>
             <p>
               <input type="submit" name="submit" class="btn btn-success"/>

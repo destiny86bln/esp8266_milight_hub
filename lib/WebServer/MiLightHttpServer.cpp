@@ -375,11 +375,15 @@ void MiLightHttpServer::handleListenGateway(const UrlTokenBindings* bindings) {
   server.send(200, "text/plain", response);
 }
 
-void MiLightHttpServer::sendGroupState(BulbId& bulbId, GroupState &state) {
+void MiLightHttpServer::sendGroupState(BulbId& bulbId, GroupState* state) {
   String body;
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& obj = jsonBuffer.createObject();
-  state.applyState(obj, bulbId, settings.groupStateFields, settings.numGroupStateFields);
+
+  if (state != NULL) {
+    state->applyState(obj, bulbId, settings.groupStateFields, settings.numGroupStateFields);
+  }
+
   obj.printTo(body);
 
   server.send(200, APPLICATION_JSON, body);
@@ -398,7 +402,7 @@ void MiLightHttpServer::handleGetGroup(const UrlTokenBindings* urlBindings) {
   }
 
   BulbId bulbId(parseInt<uint16_t>(_deviceId), _groupId, _remoteType->type);
-  GroupState& state = stateStore->get(bulbId);
+  GroupState* state = stateStore->get(bulbId);
   sendGroupState(bulbId, stateStore->get(bulbId));
 }
 

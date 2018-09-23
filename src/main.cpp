@@ -1,3 +1,5 @@
+#ifndef UNIT_TEST
+
 #include <SPI.h>
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
@@ -155,8 +157,8 @@ void initMilightUdpServers() {
 void onPacketSentHandler(uint8_t* packet, const MiLightRemoteConfig& config) {
   StaticJsonBuffer<200> buffer;
   JsonObject& result = buffer.createObject();
-  BulbId bulbId = config.packetFormatter->parsePacket(packet, result);
 
+  BulbId bulbId = config.packetFormatter->parsePacket(packet, result);
 
   // set LED mode for a packet movement
   ledStatus->oneshot(settings.ledModePacket, settings.ledModePacketCount);
@@ -170,9 +172,12 @@ void onPacketSentHandler(uint8_t* packet, const MiLightRemoteConfig& config) {
     *MiLightRemoteConfig::fromType(bulbId.deviceType);
 
   // update state to reflect changes from this packet
-  GroupState& groupState = stateStore->get(bulbId);
-  groupState.patch(result);
-  stateStore->set(bulbId, groupState);
+  GroupState* groupState = stateStore->get(bulbId);
+
+  if (groupState != NULL) {
+    groupState->patch(result);
+    stateStore->set(bulbId, *groupState);
+  }
 
   if (mqttClient) {
     // Sends the state delta derived from the raw packet
@@ -181,7 +186,9 @@ void onPacketSentHandler(uint8_t* packet, const MiLightRemoteConfig& config) {
     mqttClient->sendUpdate(remoteConfig, bulbId.deviceId, bulbId.groupId, output);
 
     // Sends the entire state
-    bulbStateUpdater->enqueueUpdate(bulbId, groupState);
+    if (groupState != NULL) {
+      bulbStateUpdater->enqueueUpdate(bulbId, *groupState);
+    }
   }
 
   httpServer->handlePacketSent(packet, remoteConfig);
@@ -613,3 +620,5 @@ void loop() {
     ESP.restart();
   }
 }
+
+#endif
