@@ -152,7 +152,7 @@ Route (5) supports these commands. Note that each bulb type has support for a di
    * `night_mode`. Enable "night mode", which is minimum brightness and bulbs only responding to on/off commands.
 1. `commands`. An array containing any number of the above commands (including repeats).
 
-The following redundant commands are supported for the sake of compatibility with HomeAssistant's [`mqtt_json`](https://home-assistant.io/components/light.mqtt_json/) light platform:
+The following redundant commands are supported for the sake of compatibility with HomeAssistant's [`mqtt`](https://home-assistant.io/components/light.mqtt/) light platform with the `json` schema:
 
 1. `color`. Hash containing RGB color. All keys for r, g, and b should be present. For example, `{"r":255,"g":200,"b":255}`.
 1. `color_temp`. Controls white temperature. Value is in [mireds](https://en.wikipedia.org/wiki/Mired). Milight bulbs are in the range 153-370 mireds (2700K-6500K).
@@ -166,14 +166,14 @@ If you'd like to control bulbs in all groups paired with a particular device ID,
 Turn on group 2 for device ID 0xCD86, set hue to 100, and brightness to 50%:
 
 ```
-$ curl -X PUT -H 'Content-Type: applicaiton/json' -d '{"status":"on","hue":100,"level":50}' http://esp8266/gateways/0xCD86/rgbw/2
+$ curl -X PUT -H 'Content-Type: application/json' -d '{"status":"on","hue":100,"level":50}' http://esp8266/gateways/0xCD86/rgbw/2
 true%
 ```
 
 Set color to white (disable RGB):
 
 ```
-$ curl -X PUT -H 'Content-Type: applicaiton/json' -d '{"command":"set_white"}' -X PUT http://esp8266/gateways/0xCD86/rgbw/2
+$ curl -X PUT -H 'Content-Type: application/json' -d '{"command":"set_white"}' -X PUT http://esp8266/gateways/0xCD86/rgbw/2
 true%
 ```
 
